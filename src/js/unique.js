@@ -5,32 +5,20 @@ var canvas;
 var camera;
 var trackball;
 
-var directionalLight;
 var pointLight;
-var spotLight;
-var hemisphereLight;
 var ambientLight;
-var directionalLightHelper;
-var pointLightHelper;
-var spotLightHelper;
-var hemisphereLightHelper;
 
 var boxObjArr = [];
+var boxNum = 192;
 
 var threeStart = function() {
   initThree();
   initCamera();
   initLight();
   
-  for (var i = 0; i < 128; i++) {
+  for (var i = 0; i < boxNum; i++) {
     boxObjArr[i] = new boxObj();
-    boxObjArr[i].rad = getRadian(i * 16);
-    boxObjArr[i].rad2 = getRadian(Math.floor(i / 10) * 20);
-    boxObjArr[i].changePositionVal();
-    boxObjArr[i].setPosition();
-    boxObjArr[i].changeRotationVal();
-    boxObjArr[i].setRotation();
-    scene.add(boxObjArr[i].mesh);
+    boxObjArr[i].init(i);
   }
   
   renderloop();
@@ -51,7 +39,7 @@ var initThree = function() {
 };
 
 var initCamera = function() {
-  camera = new THREE.PerspectiveCamera(45, bodyWidth / bodyHeight, 1, 10000);
+  camera = new THREE.PerspectiveCamera(45, bodyWidth / bodyHeight, 1, 4000);
   camera.position.set(500, 500, 500);
   camera.up.set(0, 0, 1);
   camera.lookAt({
@@ -68,41 +56,38 @@ var initCamera = function() {
   trackball.noZoom = false;
   trackball.zoomSpeed = 1;
   trackball.noPan = true;
+  trackball.minDistance = 200;
+  trackball.maxDistance = 3000;
 };
 
 var initLight = function() {
-  // directionalLight = new THREE.DirectionalLight(0xffffff, 1):
-  // directionalLight.position.set(300, 200, 400);
-  // directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
+  var pointLightSphere;
   
   pointLight = new THREE.PointLight(0xffffff, 1);
   pointLight.position.set(0, 0, 0);
   pointLightHelper = new THREE.PointLightHelper(pointLight, 1);
-  
-  // spotLight = new THREE.SpotLight(0xffffff, 1, 200, getRadian(10));
-  // spotLight.position.set(40, 40, 100);
-  // spotLightHelper = new THREE.SpotLightHelper(spotLight, 1);
-  
-  // hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000, 1);
-  // hemisphereLight.position.set(50, 20, 70);
-  // hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight, 1);
   
   ambientLight = new THREE.AmbientLight(0x111111);
   
   scene.add(pointLight);
   scene.add(ambientLight);
   
-  var pointLightSphere = new lightSphereObj();
-  pointLightSphere.setPosition();
-  scene.add(pointLightSphere.mesh);
+  pointLightSphere = new lightSphereObj();
+  pointLightSphere.init();
 };
 
 var lightSphereObj = function() {
-  this.r = 60;
+  this.r = 80;
   this.x = 0;
   this.y = 0;
   this.z = 0;
   this.segments = 24;
+  this.geometry;
+  this.material;
+  this.mesh;
+};
+
+lightSphereObj.prototype.init = function() {
   this.geometry = new THREE.SphereGeometry(this.r, this.segments);
   this.material = new THREE.MeshLambertMaterial({
     color: 0xffffff,
@@ -111,6 +96,8 @@ var lightSphereObj = function() {
     transparent: true
   });
   this.mesh = new THREE.Mesh(this.geometry, this.material);
+  this.setPosition();
+  scene.add(this.mesh);
 };
 
 lightSphereObj.prototype.setPosition = function() {
@@ -118,7 +105,8 @@ lightSphereObj.prototype.setPosition = function() {
 };
 
 var boxObj = function() {
-  this.size = getRandomInt(8, 36);
+  this.size = 1;
+  this.scale = 0;
   this.rad = 0;
   this.rad2 = 0;
   this.r = 240;
@@ -128,12 +116,32 @@ var boxObj = function() {
   this.rotateX = 0;
   this.rotateY = 0;
   this.rotateZ = 0;
-  
-  this.geometry = new THREE.BoxGeometry(this.size, this.size, this.size);
-  this.material = new THREE.MeshLambertMaterial({
-    color: 0xffffff
-  });
-  this.mesh = new THREE.Mesh(this.geometry, this.material);
+  this.mesh;
+};
+
+var boxObjGeometry = new THREE.BoxGeometry(1, 1, 1);
+
+var boxObjMaterial = new THREE.MeshLambertMaterial({
+  color: 0xffffff
+});
+
+boxObj.prototype.init = function(index) {
+  this.scale = getRandomInt(8, 36);
+  this.mesh = new THREE.Mesh(boxObjGeometry, boxObjMaterial);
+  this.rad = getRadian(360 * index / boxNum);
+  this.rad2 = getRadian(360 * index * 10 / boxNum);
+  this.changeScale();
+  this.changePositionVal();
+  this.setPosition();
+  this.changeRotationVal();
+  this.setRotation();
+  scene.add(this.mesh);
+};
+
+boxObj.prototype.changeScale = function() {
+  this.mesh.scale.x = this.scale * this.size;
+  this.mesh.scale.y = this.scale * this.size;
+  this.mesh.scale.z = this.scale * this.size;
 };
 
 boxObj.prototype.changePositionVal = function() {
@@ -149,13 +157,12 @@ boxObj.prototype.setPosition = function() {
 boxObj.prototype.changeRotationVal = function() {
   this.rotateX = this.rad * 2;
   this.rotateY = this.rad * 2;
-  this.rotateZ = this.rad2 * 2;
+  this.rotateZ = this.rad * 2;
 };
 
 boxObj.prototype.setRotation = function() {
   this.mesh.rotation.set(this.rotateX, this.rotateY, this.rotateZ);
 };
-
 
 var render = function() {
   renderer.clear();
