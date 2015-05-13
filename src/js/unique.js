@@ -192,7 +192,6 @@ var renderloop = function() {
 var resizeRenderer = function() {
   bodyWidth  = document.body.clientWidth;
   bodyHeight = document.body.clientHeight;
-  console.log(renderer);
   renderer.setSize(bodyWidth, bodyHeight);
   initCamera();
 };
