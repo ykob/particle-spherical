@@ -106,6 +106,10 @@ LightSphereObj.prototype.setPosition = function() {
   this.mesh.position.set(this.x, this.y, this.z);
 };
 
+LightSphereObj.prototype.changeScale = function() {
+  this.mesh.scale.set(1 - this.val / 500, 1 - this.val / 500, 1 - this.val / 500);
+};
+
 LightSphereObj.prototype.mathHook = function() {
   this.a = (this.valBase - this.val) * this.k;
   this.a -= this.cd * this.v;
@@ -155,9 +159,9 @@ boxObj.prototype.changeScale = function() {
 };
 
 boxObj.prototype.changePositionVal = function() {
-  this.x = Math.cos(this.rad) * Math.cos(this.rad2) * (this.r - (lightSphere.val * 1.5));
-  this.y = Math.cos(this.rad) * Math.sin(this.rad2) * (this.r - (lightSphere.val * 1.5));
-  this.z = Math.sin(this.rad) * (this.r - (lightSphere.val * 1.5));
+  this.x = Math.cos(this.rad) * Math.cos(this.rad2) * (this.r - (lightSphere.val * 1.6));
+  this.y = Math.cos(this.rad) * Math.sin(this.rad2) * (this.r - (lightSphere.val * 1.6));
+  this.z = Math.sin(this.rad) * (this.r - (lightSphere.val * 1.6));
 };
 
 boxObj.prototype.setPosition = function() {
@@ -249,6 +253,7 @@ var render = function() {
     document.body.className = '';
   };
   lightSphere.mathHook();
+  lightSphere.changeScale();
   for (var i = 0; i < boxObjArr.length; i++) {
     boxObjArr[i].rad += getRadian(0.2) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
     boxObjArr[i].rad2 += getRadian(0.2) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
