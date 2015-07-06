@@ -9,11 +9,13 @@ var intersects;
 
 var pointLight;
 var ambientLight;
+var pointLightSphere;
 
 var boxObjArr = [];
 var boxNum = 192;
 
-var isClick = false;
+var judgeRaycastSphere = false;
+var accelerating = false;
 
 var threeStart = function() {
   initThree();
@@ -55,8 +57,6 @@ var initCamera = function() {
 };
 
 var initLight = function() {
-  var pointLightSphere;
-  
   pointLight = new THREE.PointLight(0xffffff, 1);
   pointLight.position.set(0, 0, 0);
   pointLightHelper = new THREE.PointLightHelper(pointLight, 1);
@@ -66,23 +66,24 @@ var initLight = function() {
   scene.add(pointLight);
   scene.add(ambientLight);
   
-  pointLightSphere = new lightSphereObj();
+  pointLightSphere = new LightSphereObj();
   pointLightSphere.init();
 };
 
-var lightSphereObj = function() {
+var LightSphereObj = function() {
+  this.id = 0;
   this.r = 80;
   this.x = 0;
   this.y = 0;
   this.z = 0;
-  this.segments = 24;
+  this.segments = 30;
   this.geometry;
   this.material;
   this.mesh;
 };
 
-lightSphereObj.prototype.init = function() {
-  this.geometry = new THREE.SphereGeometry(this.r, this.segments);
+LightSphereObj.prototype.init = function() {
+  this.geometry = new THREE.SphereGeometry(this.r, this.segments, this.segments);
   this.material = new THREE.MeshLambertMaterial({
     color: 0xffffff,
     emissive: 0xffffff,
@@ -92,9 +93,10 @@ lightSphereObj.prototype.init = function() {
   this.mesh = new THREE.Mesh(this.geometry, this.material);
   this.setPosition();
   scene.add(this.mesh);
+  this.id = this.mesh.id;
 };
 
-lightSphereObj.prototype.setPosition = function() {
+LightSphereObj.prototype.setPosition = function() {
   this.mesh.position.set(this.x, this.y, this.z);
 };
 
@@ -122,8 +124,9 @@ var boxObjMaterial = new THREE.MeshLambertMaterial({
 boxObj.prototype.init = function(index) {
   this.scale = getRandomInt(8, 36);
   this.mesh = new THREE.Mesh(boxObjGeometry, boxObjMaterial);
-  this.rad = getRadian(360 * index / boxNum);
-  this.rad2 = getRadian(360 * index * 10 / boxNum);
+  this.rad = getRandomInt(0, 360);
+  this.rad2 = getRandomInt(0, 360);
+  this.radAccel = getRadian(getRandomInt(1, 4));
   this.changeScale();
   this.changePositionVal();
   this.setPosition();
@@ -167,13 +170,11 @@ var setEvent = function () {
     mousedownY = y;
     mouseVector.x = (x / window.innerWidth) * 2 - 1;
     mouseVector.y = - (y / window.innerHeight) * 2 + 1;
-    isClick = true;
+    judgeRaycastSphere = true;
   };
   
   var eventTouchEnd = function() {
-    mouseVector.x = -2;
-    mouseVector.y = -2;
-    isClick = false;
+    accelerating = false;
   };
   
   window.addEventListener('contextmenu', function (event) {
@@ -208,15 +209,24 @@ var setEvent = function () {
 var render = function() {
   renderer.clear();
   
-  if (isClick) {
+  if (judgeRaycastSphere) {
     raycaster.setFromCamera(mouseVector, camera);
     intersects = raycaster.intersectObjects(scene.children);
-    console.log(intersects);
+    for (var i = 0; i < intersects.length; i++) {
+      if (intersects[i].object.id == pointLightSphere.id) {
+        accelerating = true;
+      }
+    };
+    judgeRaycastSphere = false;
   }
   
   for (var i = 0; i < boxObjArr.length; i++) {
-    boxObjArr[i].rad += getRadian(0.5);
-    boxObjArr[i].rad2 += getRadian(0.5);
+    boxObjArr[i].rad += getRadian(0.2);
+    boxObjArr[i].rad2 += getRadian(0.2);
+    if (accelerating) {
+      boxObjArr[i].rad += boxObjArr[i].radAccel;
+      boxObjArr[i].rad2 += boxObjArr[i].radAccel;
+    }
     boxObjArr[i].changePositionVal();
     boxObjArr[i].setPosition();
     boxObjArr[i].changeRotationVal();
