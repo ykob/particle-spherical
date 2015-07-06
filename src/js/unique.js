@@ -196,6 +196,8 @@ var setEvent = function () {
   var mousedownY = 0;
   
   var eventTouchStart = function(x, y) {
+    mouseVector.x = (x / window.innerWidth) * 2 - 1;
+    mouseVector.y = - (y / window.innerHeight) * 2 + 1;
     judgeRaycastSphere = true;
   };
 
@@ -208,6 +210,9 @@ var setEvent = function () {
   };
 
   var eventTouchEnd = function() {
+    mouseVector.x = -2;
+    mouseVector.y = -2;
+    judgeRaycastSphere = false;
     accelerating = false;
     lightSphere.valBase = 0;
   };
@@ -238,6 +243,11 @@ var setEvent = function () {
   window.addEventListener('touchstart', function (event) {
     event.preventDefault();
     eventTouchStart(event.touches[0].clientX, event.touches[0].clientY);
+  });
+  
+  window.addEventListener('touchmove', function (event) {
+    event.preventDefault();
+    eventTouchMove(event.touches[0].clientX, event.touches[0].clientY);
   });
   
   window.addEventListener('touchend', function (event) {
