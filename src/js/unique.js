@@ -267,7 +267,7 @@ var render = function() {
   };
   lightSphere.mathHook();
   lightSphere.changeScale();
-  hemiLight.intensity = lightSphere.val / 110;
+  hemiLight.intensity = lightSphere.val / 105;
   background.material.opacity = lightSphere.val / 100;
   for (var i = 0; i < boxObjArr.length; i++) {
     boxObjArr[i].rad += getRadian(0.12) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
