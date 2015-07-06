@@ -3,13 +3,17 @@ var renderer;
 var scene;
 var canvas;
 var camera;
-var trackball;
+var raycaster = new THREE.Raycaster();
+var mouseVector = new THREE.Vector2();
+var intersects;
 
 var pointLight;
 var ambientLight;
 
 var boxObjArr = [];
 var boxNum = 192;
+
+var isClick = false;
 
 var threeStart = function() {
   initThree();
@@ -21,6 +25,7 @@ var threeStart = function() {
     boxObjArr[i].init(i);
   }
   
+  setEvent();
   renderloop();
 };
 
@@ -153,8 +158,62 @@ boxObj.prototype.setRotation = function() {
   this.mesh.rotation.set(this.rotateX, this.rotateY, this.rotateZ);
 };
 
+var setEvent = function () {
+  var mousedownX = 0;
+  var mousedownY = 0;
+  
+  var eventTouchStart = function(x, y) {
+    mousedownX = x;
+    mousedownY = y;
+    mouseVector.x = (x / window.innerWidth) * 2 - 1;
+    mouseVector.y = - (y / window.innerHeight) * 2 + 1;
+    isClick = true;
+  };
+  
+  var eventTouchEnd = function() {
+    mouseVector.x = -2;
+    mouseVector.y = -2;
+    isClick = false;
+  };
+  
+  window.addEventListener('contextmenu', function (event) {
+    event.preventDefault();
+  });
+
+  window.addEventListener('selectstart', function (event) {
+    event.preventDefault();
+  });
+  
+  canvas.addEventListener('mousedown', function (event) {
+    event.preventDefault();
+    eventTouchStart(event.clientX, event.clientY);
+  });
+  
+  canvas.addEventListener('mouseup', function (event) {
+    event.preventDefault();
+    eventTouchEnd();
+  });
+  
+  canvas.addEventListener('touchstart', function (event) {
+    event.preventDefault();
+    eventTouchStart(event.touches[0].clientX, event.touches[0].clientY);
+  });
+  
+  canvas.addEventListener('touchend', function (event) {
+    event.preventDefault();
+    eventTouchEnd();
+  });
+}
+
 var render = function() {
   renderer.clear();
+  
+  if (isClick) {
+    raycaster.setFromCamera(mouseVector, camera);
+    intersects = raycaster.intersectObjects(scene.children);
+    console.log(intersects);
+  }
+  
   for (var i = 0; i < boxObjArr.length; i++) {
     boxObjArr[i].rad += getRadian(0.5);
     boxObjArr[i].rad2 += getRadian(0.5);
