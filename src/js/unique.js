@@ -8,8 +8,9 @@ var mouseVector = new THREE.Vector2();
 var intersects;
 
 var pointLight;
-var ambientLight;
+var hemiLight;
 var lightSphere;
+var background;
 
 var boxObjArr = [];
 var boxNum = 150;
@@ -21,6 +22,7 @@ var threeStart = function() {
   initThree();
   initCamera();
   initLight();
+  initBackground();
   
   for (var i = 0; i < boxNum; i++) {
     boxObjArr[i] = new boxObj();
@@ -59,15 +61,26 @@ var initCamera = function() {
 var initLight = function() {
   pointLight = new THREE.PointLight(0xffffff, 1);
   pointLight.position.set(0, 0, 0);
-  pointLightHelper = new THREE.PointLightHelper(pointLight, 1);
   
-  ambientLight = new THREE.AmbientLight(0x111111);
+  hemiLight = new THREE.HemisphereLight(0xffff33, 0xff3333, 0);
   
   scene.add(pointLight);
-  scene.add(ambientLight);
+  scene.add(hemiLight);
   
   lightSphere = new LightSphereObj();
   lightSphere.init();
+};
+
+var initBackground = function() {
+  bgGeometry = new THREE.SphereGeometry(1000, 60, 60);
+  bgMaterial = new THREE.MeshLambertMaterial({
+    color: 0x7a7a7a,
+    side: THREE.BackSide,
+    transparent: true,
+    opacity: 0
+  });
+  background = new THREE.Mesh(bgGeometry, bgMaterial);
+  scene.add(background);
 };
 
 var LightSphereObj = function() {
@@ -77,7 +90,7 @@ var LightSphereObj = function() {
   this.y = 0;
   this.z = 0;
   this.cd = 0.4;
-  this.k  = 0.03;
+  this.k  = 0.02;
   this.val  = 0;
   this.valBase = this.val;
   this.a = 0;
@@ -143,7 +156,7 @@ boxObj.prototype.init = function(index) {
   this.mesh = new THREE.Mesh(boxObjGeometry, boxObjMaterial);
   this.rad = getRandomInt(0, 360);
   this.rad2 = getRandomInt(0, 360);
-  this.radAccel = getRadian(getRandomInt(5, 8));
+  this.radAccel = getRadian(getRandomInt(6, 10));
   this.changeScale();
   this.changePositionVal();
   this.setPosition();
@@ -254,9 +267,11 @@ var render = function() {
   };
   lightSphere.mathHook();
   lightSphere.changeScale();
+  hemiLight.intensity = lightSphere.val / 110;
+  background.material.opacity = lightSphere.val / 100;
   for (var i = 0; i < boxObjArr.length; i++) {
-    boxObjArr[i].rad += getRadian(0.2) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
-    boxObjArr[i].rad2 += getRadian(0.2) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
+    boxObjArr[i].rad += getRadian(0.12) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
+    boxObjArr[i].rad2 += getRadian(0.12) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
     boxObjArr[i].changePositionVal();
     boxObjArr[i].setPosition();
     boxObjArr[i].changeRotationVal();
