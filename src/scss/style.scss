@@ -9,21 +9,22 @@ body {
   height: 100%;
   overflow: hidden;
   background-color: #000;
+  &.is-focus-sphere {
+    cursor: pointer;
+    h1 {
+      cursor: pointer;
+    }
+  }
 }
 h1 {
+  cursor: default;
   position: absolute;
   top: 50%;
   right: 0;
   left: 0;
   margin-top: -1.5rem;
-  font-size: 3rem;
+  font-size: 2.8rem;
   font-family: 'Hammersmith One', sans-serif;
-  text-align: center;
-}
-pre.formula {
-  position: absolute;
-  bottom: 1em;
-  left: 2em;
-  line-height: 1.75;
   color: #fff;
+  text-align: center;
 }

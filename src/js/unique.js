@@ -12,7 +12,7 @@ var ambientLight;
 var lightSphere;
 
 var boxObjArr = [];
-var boxNum = 200;
+var boxNum = 150;
 
 var judgeRaycastSphere = false;
 var accelerating = false;
@@ -118,7 +118,7 @@ var boxObj = function() {
   this.scale = 0;
   this.rad = 0;
   this.rad2 = 0;
-  this.r = 240;
+  this.r = 250;
   this.x = 0;
   this.y = 0;
   this.z = 0;
@@ -179,13 +179,17 @@ var setEvent = function () {
   var mousedownY = 0;
   
   var eventTouchStart = function(x, y) {
-    mousedownX = x;
-    mousedownY = y;
-    mouseVector.x = (x / window.innerWidth) * 2 - 1;
-    mouseVector.y = - (y / window.innerHeight) * 2 + 1;
     judgeRaycastSphere = true;
   };
-  
+
+  var eventTouchMove = function(x, y) {
+    mousemoveX = x;
+    mousemoveY = y;
+    mouseVector.x = (x / window.innerWidth) * 2 - 1;
+    mouseVector.y = - (y / window.innerHeight) * 2 + 1;
+    judgeRaycastSphere = false;
+  };
+
   var eventTouchEnd = function() {
     accelerating = false;
     lightSphere.valBase = 0;
@@ -199,42 +203,51 @@ var setEvent = function () {
     event.preventDefault();
   });
   
-  canvas.addEventListener('mousedown', function (event) {
+  window.addEventListener('mousedown', function (event) {
     event.preventDefault();
     eventTouchStart(event.clientX, event.clientY);
   });
   
-  canvas.addEventListener('mouseup', function (event) {
+  window.addEventListener('mousemove', function (event) {
+    event.preventDefault();
+    eventTouchMove(event.clientX, event.clientY);
+  });
+  
+  window.addEventListener('mouseup', function (event) {
     event.preventDefault();
     eventTouchEnd();
   });
   
-  canvas.addEventListener('touchstart', function (event) {
+  window.addEventListener('touchstart', function (event) {
     event.preventDefault();
     eventTouchStart(event.touches[0].clientX, event.touches[0].clientY);
   });
   
-  canvas.addEventListener('touchend', function (event) {
+  window.addEventListener('touchend', function (event) {
     event.preventDefault();
     eventTouchEnd();
   });
 }
 
 var render = function() {
-  renderer.clear();
+  var focusLightSphere = false;
   
-  if (judgeRaycastSphere) {
-    raycaster.setFromCamera(mouseVector, camera);
-    intersects = raycaster.intersectObjects(scene.children);
-    for (var i = 0; i < intersects.length; i++) {
-      if (intersects[i].object.id == lightSphere.id) {
+  renderer.clear();
+  raycaster.setFromCamera(mouseVector, camera);
+  intersects = raycaster.intersectObjects(scene.children);
+  for (var i = 0; i < intersects.length; i++) {
+    if (intersects[i].object.id == lightSphere.id) {
+      focusLightSphere = true;
+      document.body.className = 'is-focus-sphere';
+      if (judgeRaycastSphere) {
         accelerating = true;
         lightSphere.valBase = 100;
       }
-    };
-    judgeRaycastSphere = false;
+    }
   }
-  
+  if (!focusLightSphere) {
+    document.body.className = '';
+  };
   lightSphere.mathHook();
   for (var i = 0; i < boxObjArr.length; i++) {
     boxObjArr[i].rad += getRadian(0.2) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
