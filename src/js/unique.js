@@ -47,17 +47,6 @@ var initCamera = function() {
     y: 0,
     z: 0
   });
-  
-  trackball = new THREE.TrackballControls(camera, canvas);
-  trackball.screen.width = bodyWidth;
-  trackball.screen.height = bodyHeight;
-  trackball.noRotate = false;
-  trackball.rotateSpeed = 3;
-  trackball.noZoom = false;
-  trackball.zoomSpeed = 1;
-  trackball.noPan = true;
-  trackball.minDistance = 200;
-  trackball.maxDistance = 3000;
 };
 
 var initLight = function() {
@@ -175,7 +164,6 @@ var render = function() {
     boxObjArr[i].setRotation();
   };
   renderer.render(scene, camera);
-  trackball.update();
 };
 
 var renderloop = function() {
