@@ -9,10 +9,10 @@ var intersects;
 
 var pointLight;
 var ambientLight;
-var pointLightSphere;
+var lightSphere;
 
 var boxObjArr = [];
-var boxNum = 192;
+var boxNum = 200;
 
 var judgeRaycastSphere = false;
 var accelerating = false;
@@ -66,8 +66,8 @@ var initLight = function() {
   scene.add(pointLight);
   scene.add(ambientLight);
   
-  pointLightSphere = new LightSphereObj();
-  pointLightSphere.init();
+  lightSphere = new LightSphereObj();
+  lightSphere.init();
 };
 
 var LightSphereObj = function() {
@@ -76,6 +76,12 @@ var LightSphereObj = function() {
   this.x = 0;
   this.y = 0;
   this.z = 0;
+  this.cd = 0.4;
+  this.k  = 0.03;
+  this.val  = 0;
+  this.valBase = this.val;
+  this.a = 0;
+  this.v = 0;
   this.segments = 30;
   this.geometry;
   this.material;
@@ -98,6 +104,13 @@ LightSphereObj.prototype.init = function() {
 
 LightSphereObj.prototype.setPosition = function() {
   this.mesh.position.set(this.x, this.y, this.z);
+};
+
+LightSphereObj.prototype.mathHook = function() {
+  this.a = (this.valBase - this.val) * this.k;
+  this.a -= this.cd * this.v;
+  this.v += this.a;
+  this.val  += this.v;
 };
 
 var boxObj = function() {
@@ -126,7 +139,7 @@ boxObj.prototype.init = function(index) {
   this.mesh = new THREE.Mesh(boxObjGeometry, boxObjMaterial);
   this.rad = getRandomInt(0, 360);
   this.rad2 = getRandomInt(0, 360);
-  this.radAccel = getRadian(getRandomInt(1, 4));
+  this.radAccel = getRadian(getRandomInt(5, 8));
   this.changeScale();
   this.changePositionVal();
   this.setPosition();
@@ -142,9 +155,9 @@ boxObj.prototype.changeScale = function() {
 };
 
 boxObj.prototype.changePositionVal = function() {
-  this.x = Math.cos(this.rad) * Math.cos(this.rad2) * this.r;
-  this.y = Math.cos(this.rad) * Math.sin(this.rad2) * this.r;
-  this.z = Math.sin(this.rad) * this.r;
+  this.x = Math.cos(this.rad) * Math.cos(this.rad2) * (this.r - (lightSphere.val * 1.5));
+  this.y = Math.cos(this.rad) * Math.sin(this.rad2) * (this.r - (lightSphere.val * 1.5));
+  this.z = Math.sin(this.rad) * (this.r - (lightSphere.val * 1.5));
 };
 
 boxObj.prototype.setPosition = function() {
@@ -175,6 +188,7 @@ var setEvent = function () {
   
   var eventTouchEnd = function() {
     accelerating = false;
+    lightSphere.valBase = 0;
   };
   
   window.addEventListener('contextmenu', function (event) {
@@ -213,20 +227,18 @@ var render = function() {
     raycaster.setFromCamera(mouseVector, camera);
     intersects = raycaster.intersectObjects(scene.children);
     for (var i = 0; i < intersects.length; i++) {
-      if (intersects[i].object.id == pointLightSphere.id) {
+      if (intersects[i].object.id == lightSphere.id) {
         accelerating = true;
+        lightSphere.valBase = 100;
       }
     };
     judgeRaycastSphere = false;
   }
   
+  lightSphere.mathHook();
   for (var i = 0; i < boxObjArr.length; i++) {
-    boxObjArr[i].rad += getRadian(0.2);
-    boxObjArr[i].rad2 += getRadian(0.2);
-    if (accelerating) {
-      boxObjArr[i].rad += boxObjArr[i].radAccel;
-      boxObjArr[i].rad2 += boxObjArr[i].radAccel;
-    }
+    boxObjArr[i].rad += getRadian(0.2) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
+    boxObjArr[i].rad2 += getRadian(0.2) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
     boxObjArr[i].changePositionVal();
     boxObjArr[i].setPosition();
     boxObjArr[i].changeRotationVal();
