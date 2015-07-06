@@ -46,7 +46,7 @@ var initThree = function() {
 var initCamera = function() {
   camera = new THREE.PerspectiveCamera(45, bodyWidth / bodyHeight, 1, 4000);
   camera.position.set(500, 500, 500);
-  camera.up.set(0, 0, 1);
+  camera.up.set(0, 1, 0);
   camera.lookAt({
     x: 0,
     y: 0,
