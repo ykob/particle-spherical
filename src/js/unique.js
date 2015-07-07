@@ -277,7 +277,7 @@ var render = function() {
   };
   lightSphere.mathHook();
   lightSphere.changeScale();
-  hemiLight.intensity = lightSphere.val / 105;
+  hemiLight.intensity = lightSphere.val / 110;
   background.material.opacity = lightSphere.val / 100;
   for (var i = 0; i < boxObjArr.length; i++) {
     boxObjArr[i].rad += getRadian(0.12) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
@@ -304,7 +304,6 @@ var renderloop = function() {
 var resizeRenderer = function() {
   bodyWidth  = document.body.clientWidth;
   bodyHeight = document.body.clientHeight;
-  console.log(bodyWidth, bodyHeight);
   renderer.setSize(bodyWidth, bodyHeight);
   initCamera();
 };
