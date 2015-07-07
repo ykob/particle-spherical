@@ -173,8 +173,8 @@ boxObj.prototype.changeScale = function() {
 
 boxObj.prototype.changePositionVal = function() {
   this.x = Math.cos(this.rad) * Math.cos(this.rad2) * (this.r - (lightSphere.val * 1.6));
-  this.y = Math.cos(this.rad) * Math.sin(this.rad2) * (this.r - (lightSphere.val * 1.6));
-  this.z = Math.sin(this.rad) * (this.r - (lightSphere.val * 1.6));
+  this.z = Math.cos(this.rad) * Math.sin(this.rad2) * (this.r - (lightSphere.val * 1.6));
+  this.y = Math.sin(this.rad) * (this.r - (lightSphere.val * 1.6));
 };
 
 boxObj.prototype.setPosition = function() {
@@ -304,6 +304,7 @@ var renderloop = function() {
 var resizeRenderer = function() {
   bodyWidth  = document.body.clientWidth;
   bodyHeight = document.body.clientHeight;
+  console.log(bodyWidth, bodyHeight);
   renderer.setSize(bodyWidth, bodyHeight);
   initCamera();
 };
