@@ -1,4 +1,4 @@
-var lastTimeRender;
+var lastTimeRender = +new Date();;
 var renderer;
 var scene;
 var canvas;
@@ -8,7 +8,7 @@ var mouseVector = new THREE.Vector2();
 var intersects;
 
 var pointLight;
-var hemiLight;
+var hemiLight1;
 var lightSphere;
 var background;
 
@@ -62,10 +62,12 @@ var initLight = function() {
   pointLight = new THREE.PointLight(0xffffff, 1);
   pointLight.position.set(0, 0, 0);
   
-  hemiLight = new THREE.HemisphereLight(0xffff33, 0xff3333, 0);
+  hemiLight1 = new THREE.HemisphereLight(0xffff33, 0xff3333, 0);
+  hemiLight2 = new THREE.HemisphereLight(0x003333, 0x000033, 1);
   
   scene.add(pointLight);
-  scene.add(hemiLight);
+  scene.add(hemiLight1);
+  scene.add(hemiLight2);
   
   lightSphere = new LightSphereObj();
   lightSphere.init();
@@ -77,7 +79,7 @@ var initBackground = function() {
     color: 0x7a7a7a,
     side: THREE.BackSide,
     transparent: true,
-    opacity: 0
+    opacity: 0.3
   });
   background = new THREE.Mesh(bgGeometry, bgMaterial);
   scene.add(background);
@@ -277,8 +279,9 @@ var render = function() {
   };
   lightSphere.mathHook();
   lightSphere.changeScale();
-  hemiLight.intensity = lightSphere.val / 110;
-  background.material.opacity = lightSphere.val / 100;
+  hemiLight1.intensity = lightSphere.val / 105;
+  hemiLight2.intensity = 1 - (lightSphere.val / 100);
+  background.material.opacity = 0.2 + (0.8 * lightSphere.val / 100);
   for (var i = 0; i < boxObjArr.length; i++) {
     boxObjArr[i].rad += getRadian(0.12) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
     boxObjArr[i].rad2 += getRadian(0.12) + (boxObjArr[i].radAccel * (lightSphere.val / 100));
@@ -294,11 +297,10 @@ var renderloop = function() {
   var now = +new Date();
   requestAnimationFrame(renderloop);
 
-  if (now - lastTimeRender < frameTime) {
-    return;
+  if (now - lastTimeRender > 1000 / fps) {
+    render();
+    lastTimeRender = +new Date();
   }
-  render();
-  lastTimeRender = +new Date();
 };
 
 var resizeRenderer = function() {

@@ -1,7 +1,7 @@
 var bodyWidth  = document.body.clientWidth;
 var bodyHeight = document.body.clientHeight;
 var fps = 60;
-var frameTime = 1000 / fps;
+var frameTime;
 
 var getRandomInt = function(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
