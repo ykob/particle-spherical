@@ -1,8 +1,8 @@
-# demo-particle-moving-spherical
+# particle-spherical
 
 球状に移動するパーティクル。
 
-http://ykob.github.io/demo-particle-moving-spherical/
+http://ykob.github.io/particle-spherical/
 
 球座標計算は以下。
 
